@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Charts Clone</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+html, body {
+  height: 100%;
+  overflow: hidden; /* prevent body scrollbars */
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: white;
+  margin: 0;
+  display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 70px;
+  height: 100vh;
+  background: white;
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+.sidebar a {
+  text-decoration: none;
+  color: black;
+  font-size: 24px;
+  margin: 20px 0;
+  flex-direction: column;
+  align-items: center;
+  display: flex;
+  transition: background 0.2s, color 0.2s;
+  padding: 10px;
+  border-radius: 10px;
+}
+.sidebar a:hover {
+  background: #ddd;
+  color: #ff0055;
+}
+.sidebar i { margin-bottom: 5px; }
+
+/* Main layout */
+.main {
+  margin-left: 70px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header */
+header {
+  background: white;
+  padding: 15px;
+  border-bottom: 1px solid #ccc;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  width: 100%;            /* stretch full header width */
+  background: #efefef;    /* light gray background like Pinterest */
+  border-radius: 5px;    /* rounded ends */
+  padding: 0 12px 0;
+  box-sizing: border-box;
+}
+
+.search-container input {
+  flex: 1;                 /* take up all available width */
+  border: none;
+  background: transparent; /* blend with container background */
+  height: 40px;            /* taller input bar */
+  font-size: 15px;
+  outline: none;
+  font-family: inherit;
+  color: #111;
+}
+
+.search-container button {
+  background: none;
+  border: none;
+  color: #767676;
+  font-size: 18px;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-container button:hover {
+  color: #000; /* darker on hover like Pinterest */
+}
+
+
+/* Scrollable main container */
+#main-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+#main-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Sections & cards */
+section {
+  padding: 20px;
+}
+section h2 {
+  margin-bottom: 10px;
+  color: black;
+}
+.cards-container {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  padding: 0 10px 10px 10px; /* room on right so last card isn't cut */
+}
+.cards-container::after {
+  content: '';
+  flex: 0 0 5px; /* ensures space after last card */
+}
+.cards-container::-webkit-scrollbar { height: 0; }
+.card {
+  flex: 0 0 180px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  box-shadow: 1px 1px 6px rgba(0,0,0,0.5);
+}
+.card img {
+  width: 100%;
+  display: block;
+}
+.card:hover { transform: scale(1.05); }
+.card-info {
+  padding: 10px;
+  font-size: 14px;
+  color: black;
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <a href="index.html"><i class="fas fa-home"></i><span style="font-size:10px;">Home</span></a>
+  <a href="#"><i class="fas fa-chart-line"></i><span style="font-size:10px;">Charts</span></a>
+  <a href="#"><i class="fas fa-envelope"></i><span style="font-size:10px;">Contact</span></a>
+  <a href="#"><i class="fas fa-info-circle"></i><span style="font-size:10px;">About</span></a>
+</div>
+
+<!-- Main Content Area -->
+<div class="main">
+  <header>
+    <div class="search-container">
+      <input type="search" id="search-input" placeholder="Search games...">
+      <button id="search-button"><i class="fas fa-search"></i></button>
+    </div>
+  </header>
+
+  <div id="main-container"></div>
+</div>
+
+<script>
+// Game data
+const gamesData = [
+  // ==== Games ====
+  { image:"https://via.placeholder.com/180x100", alt:"Cookie Clicker", category:"Games", title:"Cookie Clicker", link:"https://zansah.github.io/cookie-clicker/" },
+  { image:"https://via.placeholder.com/180x100", alt:"Blackjack", category:"Games", title:"Blackjack", link:"https://zansah.github.io/blackjack/" },
+  { image:"https://via.placeholder.com/180x100", alt:"Tic Tac Toe", category:"Games", title:"Tic-Tac-Tie", link:"https://zansah.github.io/Tic-Tac-Tie/" },
+  { image:"https://via.placeholder.com/180x100", alt:"Minecraft Block", category:"Games", title:"Minecraft Block", link:"https://zansah.github.io/Minecraft-Block/" },
+  { image:"https://via.placeholder.com/180x100", alt:"Memory Game", category:"Games", title:"Memory Game", link:"https://zansah.github.io/Memory-Game/" },
+  { image:"https://via.placeholder.com/180x100", alt:"Volleyball Scoreboard", category:"Games", title:"Volleyball Scoreboard", link:"https://zansah.github.io/Volleyball-Scoreboard/" },
+  { image:"https://via.placeholder.com/180x100", alt:"Guessing Game", category:"Games", title:"Guessing Game", link:"https://zansah.github.io/Guessing-Game-Javascript-/" },
+  { image:"https://via.placeholder.com/180x100", alt:"Rock Paper Scissors", category:"Games", title:"Rock Paper Scissors", link:"https://zansah.github.io/Rock-Paper-Scissors/" },
+
+  // ==== Utilities ====
+  { image:"https://via.placeholder.com/180x100", alt:"Calculator", category:"Utilities", title:"Calculator", link:"https://zansah.github.io/Calculator/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Love Calculator", category:"Utilities", title:"Love Calculator", link:"https://zansah.github.io/Loce-Calculator/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Color-Gen", category:"Utilities", title:"Color-Gen", link:"https://zansah.github.io/Color-Gen/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Age Calculator", category:"Utilities", title:"Age Calculator", link:"https://zansah.github.io/Age_Calculator/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Advanced-Palindrome", category:"Utilities", title:"Advanced-Palindrome", link:"https://zansah.github.io/Advanced-Palindrome/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Tip Calculator", category:"Utilities", title:"Tip Calculator", link:"https://zansah.github.io/Tip-Calculator/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Weight Converter", category:"Utilities", title:"Weight Converter", link:"https://zansah.github.io/Weight Converter/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Word Counter", category:"Utilities", title:"Word Counter", link:"https://zansah.github.io/Word-Counter/"},
+
+  // ==== Creative Apps ====
+  { image:"https://via.placeholder.com/180x100", alt:"Mini Pinterest", category:"Creative Apps", title:"Mini Pinterest", link:"https://zansah.github.io/Mini-pinterest/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Profile card", category:"Creative Apps", title:"Profile card", link:"https://zansah.github.io/Profile-card/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Color Generator", category:"Creative Apps", title:"Color Generator", link:"https://zansah.github.io/Color-Gen/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Writing Prompt Generator", category:"Creative Apps", title:"Writing Prompt Generator", link:"https://zansah.github.io/Writing-Prompt-Generator/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Anime Tier List", category:"Creative Apps", title:"Anime Tier List", link:"https://zansah.github.io/Anime-Tier-List/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Joke Generator", category:"Creative Apps", title:"Joke Generator", link:"https://zansah.github.io/Joke-generator/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Anime Anagram", category:"Creative Apps", title:"Anime-Anagram", link:"https://zansah.github.io/Anime-Anagram/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Pendulum Simulation", category:"Creative Apps", title:"Pendulum Simulation", link:"https://zansah.github.io/Pendulum Simulation/"},
+
+  // ==== Other Projects ====
+  { image:"https://via.placeholder.com/180x100", alt:"Sun's Noodles", category:"Other Projects", title:"Sun's Noodles", link:"https://zansah.github.io/SunsNoodles/" },
+  { image:"https://via.placeholder.com/180x100", alt:"Potential", category:"Other Projects", title:"potential", link:"https://zansah.github.io/potential/" },
+  { image:"https://via.placeholder.com/180x100", alt:"Zansah Repo", category:"Other Projects", title:"Zansah", link:"https://github.com/Zansah/Zansah" },
+  { image:"https://via.placeholder.com/180x100", alt:"Blox Fruits", category:"Other Projects", title:"Blox Fruits", link:"#"},
+  { image:"https://via.placeholder.com/180x100", alt:"Up-and-Coming", category:"Other Projects", title:"GAG Trading Hub", link:"#"},
+  { image:"https://via.placeholder.com/180x100", alt:"Periodic Table", category:"Other Projects", title:"Periodic-Table", link:"https://zansah.github.io/Periodic-Table/"},
+  { image:"https://via.placeholder.com/180x100", alt:"Chainsaw Man", category:"Other Projects", title:"chainsaw-man-landing-page", link:"https://zansah.github.io/chainsaw-man-landing-page/"}
+];
+
+  
+// Render grouped by category
+function renderSections(data) {
+  const container = document.getElementById('main-container');
+  container.innerHTML = '';
+  const categories = [...new Set(data.map(g=>g.category))];
+  categories.forEach(cat => {
+    const sectionGames = data.filter(g=>g.category === cat);
+    let html = `<section><h2>${cat}</h2><div class="cards-container">`;
+    sectionGames.forEach(game => {
+      html += `
+        <a href="${game.link}" class="card" target="_blank">
+          <img src="${game.image}" alt="${game.alt}">
+          <div class="card-info">${game.title}</div>
+        </a>`;
+    });
+    html += '</div></section>';
+    container.innerHTML += html;
+  });
+}
+
+// Search
+function searchProjects() {
+  const term = document.getElementById('search-input').value.toLowerCase().trim();
+  if (!term) return renderSections(gamesData);
+  renderSections(gamesData.filter(g => g.title.toLowerCase().includes(term)));
+}
+
+document.getElementById('search-button').addEventListener('click', searchProjects);
+document.getElementById('search-input').addEventListener('keyup', e=>{
+  if(e.key==='Enter') searchProjects();
+});
+
+// Initial load
+renderSections(gamesData);
+</script>
+</body>
+</html>
